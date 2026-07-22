@@ -2,7 +2,7 @@ package vazkii.patchouli.client.book.page;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import vazkii.patchouli.api.IVariable;
 import vazkii.patchouli.client.book.gui.GuiBook;
@@ -38,16 +38,16 @@ public class PageText extends PageWithText {
 			String smolText = "";
 
 			if (mc.options.advancedItemTooltips) {
-				ResourceLocation res = parent.getEntry().getId();
+				Identifier res = parent.getEntry().getId();
 				smolText = res.toString();
 			} else if (entry.getAddedBy() != null) {
 				smolText = I18n.get("patchouli.gui.lexicon.added_by", entry.getAddedBy());
 			}
 
 			if (!smolText.isEmpty()) {
-				graphics.pose().scale(0.5F, 0.5F, 1F);
+				graphics.pose().scale(0.5F, 0.5F);
 				parent.drawCenteredStringNoShadow(graphics, smolText, GuiBook.PAGE_WIDTH, 12, book.headerColor);
-				graphics.pose().scale(2F, 2F, 1F);
+				graphics.pose().scale(2F, 2F);
 				renderedSmol = true;
 			}
 

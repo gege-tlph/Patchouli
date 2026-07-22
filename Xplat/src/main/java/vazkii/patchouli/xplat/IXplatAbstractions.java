@@ -2,10 +2,11 @@ package vazkii.patchouli.xplat;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 
 import vazkii.patchouli.api.PatchouliAPI;
 
@@ -20,12 +21,12 @@ import java.util.stream.Collectors;
  */
 public interface IXplatAbstractions {
 	// Events
-	void fireDrawBookScreen(ResourceLocation book, Screen gui, int mouseX, int mouseY, float partialTicks, GuiGraphics graphics);
-	void fireBookReload(ResourceLocation book);
+	void fireDrawBookScreen(Identifier book, Screen gui, int mouseX, int mouseY, float partialTicks, GuiGraphics graphics);
+	void fireBookReload(Identifier book);
 
 	// Networking
 	void sendReloadContentsMessage(MinecraftServer server);
-	void sendOpenBookGui(ServerPlayer player, ResourceLocation book, @Nullable ResourceLocation entry, int page);
+	void sendOpenBookGui(ServerPlayer player, Identifier book, @Nullable Identifier entry, int page);
 
 	// FML/FabricLoader-related
 	Collection<XplatModContainer> getAllMods();
@@ -50,9 +51,13 @@ public interface IXplatAbstractions {
 			var names = providers.stream().map(p -> p.type().getName()).collect(Collectors.joining(",", "[", "]"));
 			throw new IllegalStateException("There should be exactly one IXplatAbstractions implementation on the classpath. Found: " + names);
 		} else {
-			var provider = providers.get(0);
-			PatchouliAPI.LOGGER.debug("Instantiating xplat impl: " + provider.type().getName());
+			var provider = providers.getFirst();
+			PatchouliAPI.LOGGER.debug("Instantiating xplat impl: {}", provider.type().getName());
 			return provider.get();
 		}
 	}
+
+	Ingredient createComponentIngredient(ItemStack itemStack);
+
+	Ingredient createCompoundIngredient(Ingredient[] ingredients);
 }

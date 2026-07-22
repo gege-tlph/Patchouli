@@ -1,7 +1,7 @@
 pluginManagement {
     plugins {
         id 'net.neoforged.moddev' version '2.0.105' apply false
-        id 'fabric-loom' version '1.11-SNAPSHOT' apply false
+        id 'fabric-loom' version '1.17.14' apply false
     }
     repositories {
         maven {
@@ -22,4 +22,6 @@ plugins {
 }
 
 rootProject.name = 'Patchouli'
-include("Xplat", "Fabric", "NeoForge")
+// This branch targets Fabric only. Xplat remains the shared source tree and is
+// compiled by the Fabric project; NeoForge is not configured against 1.21.11.
+include("Fabric")

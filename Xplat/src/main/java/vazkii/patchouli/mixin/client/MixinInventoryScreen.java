@@ -4,10 +4,11 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractRecipeBookScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.InventoryMenu;
 
@@ -24,14 +25,14 @@ import vazkii.patchouli.common.book.BookRegistry;
 import java.util.List;
 
 @Mixin(InventoryScreen.class)
-public abstract class MixinInventoryScreen extends EffectRenderingInventoryScreen<InventoryMenu> {
-	public MixinInventoryScreen(InventoryMenu container, Inventory playerInventory, Component text) {
-		super(container, playerInventory, text);
+public abstract class MixinInventoryScreen extends AbstractRecipeBookScreen<InventoryMenu> {
+	public MixinInventoryScreen(InventoryMenu menu, RecipeBookComponent<?> recipeBookComponent, Inventory playerInventory, Component title) {
+		super(menu, recipeBookComponent, playerInventory, title);
 	}
 
 	@Inject(at = @At("RETURN"), method = "init()V")
 	public void onGuiInitPost(CallbackInfo info) {
-		var bookID = ResourceLocation.tryParse(PatchouliConfig.get().inventoryButtonBook());
+		var bookID = Identifier.tryParse(PatchouliConfig.get().inventoryButtonBook());
 		Book book = BookRegistry.INSTANCE.books.get(bookID);
 		if (book == null) {
 			return;

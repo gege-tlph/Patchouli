@@ -3,7 +3,8 @@ package vazkii.patchouli.client.gui;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.advancements.AdvancementsScreen;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.resources.Identifier;
 
 import vazkii.patchouli.client.base.ClientAdvancements;
 
@@ -11,7 +12,7 @@ public class GuiAdvancementsExt extends AdvancementsScreen {
 
 	Screen parent;
 
-	public GuiAdvancementsExt(net.minecraft.client.multiplayer.ClientAdvancements manager, Screen parent, ResourceLocation tab) {
+	public GuiAdvancementsExt(net.minecraft.client.multiplayer.ClientAdvancements manager, Screen parent, Identifier tab) {
 		super(manager);
 		this.parent = parent;
 
@@ -22,13 +23,12 @@ public class GuiAdvancementsExt extends AdvancementsScreen {
 	}
 
 	@Override
-	public boolean keyPressed(int key, int scanCode, int modifiers) {
-		if (minecraft.options.keyAdvancements.matches(key, scanCode) || scanCode == 1) {
+	public boolean keyPressed(KeyEvent event) {
+		if (minecraft.options.keyAdvancements.matches(event) || event.scancode() == 1) {
 			minecraft.setScreen(parent);
 			return true;
 		} else {
-			return super.keyPressed(key, scanCode, modifiers);
+			return super.keyPressed(event);
 		}
 	}
-
 }

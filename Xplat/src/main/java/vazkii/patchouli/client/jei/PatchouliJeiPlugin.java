@@ -8,7 +8,8 @@ import mezz.jei.api.registration.ISubtypeRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
 
 import net.minecraft.client.KeyMapping;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import vazkii.patchouli.api.PatchouliAPI;
@@ -22,7 +23,7 @@ import java.util.Map;
 
 @JeiPlugin
 public class PatchouliJeiPlugin implements IModPlugin {
-	private static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath(PatchouliAPI.MOD_ID, PatchouliAPI.MOD_ID);
+	private static final Identifier UID = Identifier.fromNamespaceAndPath(PatchouliAPI.MOD_ID, PatchouliAPI.MOD_ID);
 
 	private static final KeyMapping showRecipe, showUses;
 
@@ -39,7 +40,7 @@ public class PatchouliJeiPlugin implements IModPlugin {
 
 	@NotNull
 	@Override
-	public ResourceLocation getPluginUid() {
+	public Identifier getPluginUid() {
 		return UID;
 	}
 
@@ -58,13 +59,13 @@ public class PatchouliJeiPlugin implements IModPlugin {
 		PatchouliJeiPlugin.jeiRuntime = jeiRuntime;
 	}
 
-	public static boolean handleRecipeKeybind(int keyCode, int scanCode, ItemStack stack) {
-		if (showRecipe != null && showRecipe.matches(keyCode, scanCode)) {
+	public static boolean handleRecipeKeybind(KeyEvent event, ItemStack stack) {
+		if (showRecipe != null && showRecipe.matches(event)) {
 			var focus = jeiRuntime.getJeiHelpers().getFocusFactory().createFocus(RecipeIngredientRole.OUTPUT, VanillaTypes.ITEM_STACK, stack);
 			jeiRuntime.getRecipesGui().show(focus);
 			return true;
 		}
-		if (showUses != null && showUses.matches(keyCode, scanCode)) {
+		if (showUses != null && showUses.matches(event)) {
 			var focus = jeiRuntime.getJeiHelpers().getFocusFactory().createFocus(RecipeIngredientRole.INPUT, VanillaTypes.ITEM_STACK, stack);
 			jeiRuntime.getRecipesGui().show(focus);
 			return true;

@@ -3,7 +3,8 @@ package vazkii.patchouli.client.book.template;
 import com.google.gson.annotations.SerializedName;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.Level;
 
 import vazkii.patchouli.api.IComponentProcessor;
@@ -26,18 +27,18 @@ import java.util.function.Supplier;
 
 public class BookTemplate {
 
-	public static final HashMap<ResourceLocation, Class<? extends TemplateComponent>> componentTypes = new HashMap<>();
+	public static final HashMap<Identifier, Class<? extends TemplateComponent>> componentTypes = new HashMap<>();
 
 	static {
-		registerComponent(ResourceLocation.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "text"), ComponentText.class);
-		registerComponent(ResourceLocation.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "item"), ComponentItemStack.class);
-		registerComponent(ResourceLocation.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "image"), ComponentImage.class);
-		registerComponent(ResourceLocation.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "header"), ComponentHeader.class);
-		registerComponent(ResourceLocation.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "separator"), ComponentSeparator.class);
-		registerComponent(ResourceLocation.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "frame"), ComponentFrame.class);
-		registerComponent(ResourceLocation.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "entity"), ComponentEntity.class);
-		registerComponent(ResourceLocation.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "tooltip"), ComponentTooltip.class);
-		registerComponent(ResourceLocation.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "custom"), ComponentCustom.class);
+		registerComponent(Identifier.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "text"), ComponentText.class);
+		registerComponent(Identifier.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "item"), ComponentItemStack.class);
+		registerComponent(Identifier.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "image"), ComponentImage.class);
+		registerComponent(Identifier.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "header"), ComponentHeader.class);
+		registerComponent(Identifier.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "separator"), ComponentSeparator.class);
+		registerComponent(Identifier.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "frame"), ComponentFrame.class);
+		registerComponent(Identifier.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "entity"), ComponentEntity.class);
+		registerComponent(Identifier.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "tooltip"), ComponentTooltip.class);
+		registerComponent(Identifier.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "custom"), ComponentCustom.class);
 	}
 
 	@SerializedName("include") List<TemplateInclusion> inclusions = new ArrayList<>();
@@ -58,11 +59,11 @@ public class BookTemplate {
 	transient boolean attemptedCreatingProcessor = false;
 
 	public static BookTemplate createTemplate(Book book, BookContentsBuilder builder, String type, @Nullable TemplateInclusion inclusion) {
-		ResourceLocation key;
+		Identifier key;
 		if (type.contains(":")) {
-			key = ResourceLocation.tryParse(type);
+			key = Identifier.tryParse(type);
 		} else {
-			key = ResourceLocation.fromNamespaceAndPath(book.id.getNamespace(), type);
+			key = Identifier.fromNamespaceAndPath(book.id.getNamespace(), type);
 		}
 
 		Supplier<BookTemplate> supplier = builder.getTemplate(key);
@@ -145,10 +146,10 @@ public class BookTemplate {
 		}
 	}
 
-	public boolean mouseClicked(BookPage page, double mouseX, double mouseY, int mouseButton) {
+	public boolean mouseClicked(BookPage page, MouseButtonEvent event, boolean doubleClick) {
 		if (compiled) {
 			for (TemplateComponent c : components) {
-				if (c.isVisible && c.mouseClicked(page, mouseX, mouseY, mouseButton)) {
+				if (c.isVisible && c.mouseClicked(page, event, doubleClick)) {
 					return true;
 				}
 			}
@@ -157,7 +158,7 @@ public class BookTemplate {
 		return false;
 	}
 
-	public static void registerComponent(ResourceLocation name, Class<? extends TemplateComponent> clazz) {
+	public static void registerComponent(Identifier name, Class<? extends TemplateComponent> clazz) {
 		componentTypes.put(name, clazz);
 	}
 

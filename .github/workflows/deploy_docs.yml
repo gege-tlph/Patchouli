@@ -1,33 +1,46 @@
 name: Deploy docs
 
 on:
+  workflow_dispatch:
   push:
+    branches:
+      - port/1.21.11-fabric
     paths:
-      - 'web/**'
+      - web/**
+      - .github/workflows/deploy_docs.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-docs
+  cancel-in-progress: true
 
 jobs:
   deploy-docs:
-    name: Deploy docs
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16.x
-          cache: yarn
-          cache-dependency-path: 'web/yarn.lock'
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-        working-directory: ./web
-      - name: Build website
-        run: yarn build
-        working-directory: ./web
 
-      # Popular action to deploy to GitHub Pages:
-      # Docs: https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-docusaurus
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: yarn
+          cache-dependency-path: web/yarn.lock
+
+      - name: Install dependencies
+        run: corepack yarn install --frozen-lockfile
+        working-directory: web
+
+      - name: Build website
+        run: corepack yarn build
+        working-directory: web
+
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          # Build output to publish to the `gh-pages` branch:
-          publish_dir: ./web/build
+          publish_dir: web/build

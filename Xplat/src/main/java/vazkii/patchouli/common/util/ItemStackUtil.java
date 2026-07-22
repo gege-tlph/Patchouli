@@ -3,6 +3,7 @@ package vazkii.patchouli.common.util;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.JsonOps;
 
 import net.minecraft.commands.arguments.item.ItemParser;
@@ -13,18 +14,21 @@ import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.display.SlotDisplayContext;
+import net.minecraft.world.level.Level;
 
 import org.apache.commons.lang3.tuple.Triple;
 
 import vazkii.patchouli.common.book.Book;
 import vazkii.patchouli.common.book.BookRegistry;
 import vazkii.patchouli.common.item.ItemModBook;
+import vazkii.patchouli.xplat.IXplatAbstractions;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -56,7 +60,7 @@ public final class ItemStackUtil {
 		var components = parsed.getMiddle();
 		var count = parsed.getRight();
 		if (!holder.isBound() && holder.unwrapKey().isPresent()) {
-			throw new RuntimeException("Unknown item ID: " + holder.unwrapKey().get().location());
+			throw new RuntimeException("Unknown item ID: " + holder.unwrapKey().get().identifier());
 		}
 		Item item = holder.value();
 		ItemStack stack = new ItemStack(item, count);
@@ -72,20 +76,29 @@ public final class ItemStackUtil {
 	}
 
 	public static Ingredient loadIngredientFromString(String ingredientString, HolderLookup.Provider registries) {
-		return Ingredient.of(loadStackListFromString(ingredientString, registries).toArray(new ItemStack[0]));
+		List<Either<ItemStack, HolderSet<Item>>> stacksOrTags = loadStackListFromString(ingredientString, registries);
+		List<Ingredient> ingredients = new ArrayList<>();
+		for (Either<ItemStack, HolderSet<Item>> stackOrTag : stacksOrTags) {
+			ingredients.add(stackOrTag.map(IXplatAbstractions.INSTANCE::createComponentIngredient, Ingredient::of));
+		}
+		return switch (ingredients.size()) {
+		case 0 -> throw new UnsupportedOperationException("Ingredients can't be empty");
+		case 1 -> ingredients.getFirst();
+		default -> IXplatAbstractions.INSTANCE.createCompoundIngredient(ingredients.toArray(new Ingredient[0]));
+		};
 	}
 
-	public static List<ItemStack> loadStackListFromString(String ingredientString, HolderLookup.Provider registries) {
+	public static List<Either<ItemStack, HolderSet<Item>>> loadStackListFromString(String ingredientString, HolderLookup.Provider registries) {
 		String[] stacksSerialized = splitStacksFromSerializedIngredient(ingredientString);
-		List<ItemStack> stacks = new ArrayList<>();
+		List<Either<ItemStack, HolderSet<Item>>> stacks = new ArrayList<>();
 		for (String s : stacksSerialized) {
 			if (s.isEmpty())
 				continue;
 			if (s.startsWith("tag:")) {
-				var key = TagKey.create(Registries.ITEM, ResourceLocation.tryParse(s.substring(4)));
-				registries.lookupOrThrow(Registries.ITEM).get(key).stream().flatMap(HolderSet::stream).forEach(item -> stacks.add(new ItemStack(item)));
+				var key = TagKey.create(Registries.ITEM, Identifier.parse(s.substring(4)));
+				registries.lookupOrThrow(Registries.ITEM).get(key).ifPresent(holders -> stacks.add(Either.right(holders)));
 			} else {
-				stacks.add(loadStackFromString(s, registries));
+				stacks.add(Either.left(loadStackFromString(s, registries)));
 			}
 		}
 		return stacks;
@@ -109,6 +122,10 @@ public final class ItemStackUtil {
 		}
 
 		return null;
+	}
+
+	public static List<ItemStack> getStacksFromIngredient(Ingredient ingredient, Level level) {
+		return ingredient.display().resolveForStacks(SlotDisplayContext.fromLevel(level));
 	}
 
 	public static class StackWrapper {
@@ -190,7 +207,7 @@ public final class ItemStackUtil {
 	public static ItemStack loadStackFromJson(JsonObject json, HolderLookup.Provider registries) {
 		String itemName = json.get("item").getAsString();
 
-		Item item = BuiltInRegistries.ITEM.getOptional(ResourceLocation.tryParse(itemName)).orElseThrow(() -> new IllegalArgumentException("Unknown item '" + itemName + "'")
+		Item item = BuiltInRegistries.ITEM.getOptional(Identifier.tryParse(itemName)).orElseThrow(() -> new IllegalArgumentException("Unknown item '" + itemName + "'")
 		);
 
 		ItemStack stack = new ItemStack(item, GsonHelper.getAsInt(json, "count", 1));

@@ -1,17 +1,20 @@
 package vazkii.patchouli.client.book.page;
 
 import com.google.gson.annotations.SerializedName;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
+
+import org.joml.Quaternionf;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 import vazkii.patchouli.api.PatchouliAPI;
 import vazkii.patchouli.client.base.ClientTicker;
@@ -63,8 +66,6 @@ public class PageEntity extends PageWithText {
 	public void render(GuiGraphics graphics, int mouseX, int mouseY, float pticks) {
 		int x = GuiBook.PAGE_WIDTH / 2 - 53;
 		int y = 7;
-		RenderSystem.enableBlend();
-		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 		GuiBook.drawFromTexture(graphics, book, x, y, 405, 149, 106, 106);
 
 		if (name == null || name.isEmpty()) {
@@ -81,27 +82,36 @@ public class PageEntity extends PageWithText {
 
 		if (entity != null) {
 			float rotation = rotate ? ClientTicker.total : defaultRotation;
-			renderEntity(graphics, entity, 58, 60, rotation, renderScale, offset);
+			graphics.pose().pushMatrix();
+			graphics.pose().translate(x, y);
+			renderEntity(graphics, entity, 58, 60, 106, 106, rotation, renderScale * parent.getScaleFactor(), offset, pticks);
+			graphics.pose().popMatrix();
 		}
 
 		super.render(graphics, mouseX, mouseY, pticks);
 	}
 
-	public static void renderEntity(GuiGraphics graphics, Entity entity, float x, float y, float rotation, float renderScale, float offset) {
-		PoseStack ms = graphics.pose();
-		ms.pushPose();
-		ms.translate(x, y, 50);
-		ms.scale(renderScale, renderScale, renderScale);
-		ms.translate(0, offset, 0);
-		ms.mulPose(Axis.ZP.rotationDegrees(180));
-		ms.mulPose(Axis.YP.rotationDegrees(rotation));
-		EntityRenderDispatcher erd = Minecraft.getInstance().getEntityRenderDispatcher();
-		MultiBufferSource.BufferSource immediate = Minecraft.getInstance().renderBuffers().bufferSource();
-		erd.setRenderShadow(false);
-		erd.render(entity, 0, 0, 0, 0, 1, ms, immediate, 0xF000F0);
-		erd.setRenderShadow(true);
-		immediate.endBatch();
-		ms.popPose();
+	public static void renderEntity(GuiGraphics graphics, Entity entity, int x, int y, int width, int height, float rotation, float renderScale, float offset, float pticks) {
+		Vector2f position = graphics.pose().transformPosition(x, y, new Vector2f());
+
+		int posX = Math.round(position.x);
+		int posY = Math.round(position.y);
+
+		EntityRenderDispatcher entityrenderdispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+		EntityRenderer<? super Entity, ?> entityrenderer = entityrenderdispatcher.getRenderer(entity);
+		EntityRenderState entityrenderstate = entityrenderer.createRenderState(entity, pticks);
+		entityrenderstate.lightCoords = 0xf000f0;
+		entityrenderstate.shadowPieces.clear();
+		entityrenderstate.outlineColor = 0;
+
+		Quaternionf rot = Axis.ZP.rotationDegrees(180).mul(Axis.YP.rotationDegrees(rotation));
+		int startX = posX - width;
+		int startY = posY - height;
+		int endX = posX + width;
+		int endY = posY + height;
+		graphics.enableScissor(3, 2, width - 3, height - 3);
+		graphics.submitEntityRenderState(entityrenderstate, renderScale, new Vector3f(-0.1f, offset, 0f), rot, new Quaternionf(), startX, startY, endX, endY);
+		graphics.disableScissor();
 	}
 
 	private void loadEntity(Level world) {

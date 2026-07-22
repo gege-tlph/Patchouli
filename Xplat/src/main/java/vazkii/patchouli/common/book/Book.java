@@ -3,16 +3,17 @@ package vazkii.patchouli.common.book;
 import com.google.common.base.Suppliers;
 import com.google.gson.JsonObject;
 
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.registries.VanillaRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
@@ -36,10 +37,10 @@ import java.util.function.Supplier;
 public class Book {
 
 	private static final String[] ORDINAL_SUFFIXES = new String[] { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
-	private static final ResourceLocation DEFAULT_MODEL = ResourceLocation.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "book_brown");
-	private static final ResourceLocation DEFAULT_BOOK_TEXTURE = ResourceLocation.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "textures/gui/book_brown.png");
-	private static final ResourceLocation DEFAULT_FILLER_TEXTURE = ResourceLocation.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "textures/gui/page_filler.png");
-	private static final ResourceLocation DEFAULT_CRAFTING_TEXTURE = ResourceLocation.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "textures/gui/crafting.png");
+	private static final Identifier DEFAULT_MODEL = Identifier.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "book_brown");
+	private static final Identifier DEFAULT_BOOK_TEXTURE = Identifier.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "textures/gui/book_brown.png");
+	private static final Identifier DEFAULT_FILLER_TEXTURE = Identifier.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "textures/gui/page_filler.png");
+	private static final Identifier DEFAULT_CRAFTING_TEXTURE = Identifier.fromNamespaceAndPath(PatchouliAPI.MOD_ID, "textures/gui/crafting.png");
 
 	private static final Map<String, String> DEFAULT_MACROS = Util.make(() -> {
 		Map<String, String> ret = new HashMap<>();
@@ -57,10 +58,16 @@ public class Book {
 	private boolean wasUpdated = false;
 
 	public final XplatModContainer owner;
-	public final ResourceLocation id;
+	public final Identifier id;
 	private Supplier<ItemStack> bookItem;
 
-	public final int textColor, headerColor, nameplateColor, linkColor, linkHoverColor, progressBarColor, progressBarBackground;
+	public final int textColor;
+	public final int headerColor;
+	public final int nameplateColor;
+	public final int linkColor;
+	public final int linkHoverColor;
+	public final int progressBarColor;
+	public final int progressBarBackground;
 
 	public final boolean isExternal;
 
@@ -69,13 +76,16 @@ public class Book {
 	public final String name;
 	public final String landingText;
 
-	public final ResourceLocation bookTexture, fillerTexture, craftingTexture;
+	public final Identifier bookTexture;
+	public final Identifier fillerTexture;
+	public final Identifier craftingTexture;
 
-	public final ResourceLocation model;
+	public final Identifier model;
 
 	public final boolean useBlockyFont;
 
-	public final ResourceLocation openSound, flipSound;
+	public final Identifier openSound;
+	public final Identifier flipSound;
 
 	public final boolean showProgress;
 
@@ -84,9 +94,9 @@ public class Book {
 	public final String version;
 	public final String subtitle;
 
-	@Nullable public final ResourceLocation creativeTab;
+	@Nullable public final Identifier creativeTab;
 
-	@Nullable public final ResourceLocation advancementsTab;
+	@Nullable public final Identifier advancementsTab;
 
 	public final boolean noBook;
 
@@ -102,16 +112,20 @@ public class Book {
 	public final Map<String, String> macros = new HashMap<>();
 
 	private static int parseColor(JsonObject root, String key, String defaultColor) {
-		return 0xFF000000 | Integer.parseInt(GsonHelper.getAsString(root, key, defaultColor), 16);
+		return parseColor(GsonHelper.getAsString(root, key, defaultColor));
 	}
 
-	public Book(JsonObject root, XplatModContainer owner, ResourceLocation id, boolean external) {
+	private static int parseColor(String value) {
+		return 0xFF000000 | Integer.parseInt(value, 16);
+	}
+
+	public Book(JsonObject root, XplatModContainer owner, Identifier id, boolean external) {
 		this.name = GsonHelper.getAsString(root, "name");
 		this.landingText = GsonHelper.getAsString(root, "landing_text", "patchouli.gui.lexicon.landing_info");
-		this.bookTexture = SerializationUtil.getAsResourceLocation(root, "book_texture", DEFAULT_BOOK_TEXTURE);
-		this.fillerTexture = SerializationUtil.getAsResourceLocation(root, "filler_texture", DEFAULT_FILLER_TEXTURE);
-		this.craftingTexture = SerializationUtil.getAsResourceLocation(root, "crafting_texture", DEFAULT_CRAFTING_TEXTURE);
-		this.model = SerializationUtil.getAsResourceLocation(root, "model", DEFAULT_MODEL).withPrefix("item/");
+		this.bookTexture = SerializationUtil.getAsIdentifier(root, "book_texture", DEFAULT_BOOK_TEXTURE);
+		this.fillerTexture = SerializationUtil.getAsIdentifier(root, "filler_texture", DEFAULT_FILLER_TEXTURE);
+		this.craftingTexture = SerializationUtil.getAsIdentifier(root, "crafting_texture", DEFAULT_CRAFTING_TEXTURE);
+		this.model = SerializationUtil.getAsIdentifier(root, "model", DEFAULT_MODEL);
 		this.useBlockyFont = GsonHelper.getAsBoolean(root, "use_blocky_font", false);
 
 		this.owner = owner;
@@ -124,14 +138,14 @@ public class Book {
 		this.linkHoverColor = parseColor(root, "link_hover_color", "8800EE");
 		this.progressBarColor = parseColor(root, "progress_bar_color", "FFFF55");
 		this.progressBarBackground = parseColor(root, "progress_bar_background", "DDDDDD");
-		this.openSound = SerializationUtil.getAsResourceLocation(root, "open_sound", PatchouliSounds.BOOK_OPEN.getLocation());
-		this.flipSound = SerializationUtil.getAsResourceLocation(root, "flip_sound", PatchouliSounds.BOOK_FLIP.getLocation());
+		this.openSound = SerializationUtil.getAsIdentifier(root, "open_sound", PatchouliSounds.BOOK_OPEN.identifier());
+		this.flipSound = SerializationUtil.getAsIdentifier(root, "flip_sound", PatchouliSounds.BOOK_FLIP.identifier());
 		this.showProgress = GsonHelper.getAsBoolean(root, "show_progress", true);
 		this.indexIconRaw = GsonHelper.getAsString(root, "index_icon", "");
 		this.version = GsonHelper.getAsString(root, "version", "0");
 		this.subtitle = GsonHelper.getAsString(root, "subtitle", "");
-		this.creativeTab = SerializationUtil.getAsResourceLocation(root, "creative_tab", null);
-		this.advancementsTab = SerializationUtil.getAsResourceLocation(root, "advancements_tab", null);
+		this.creativeTab = SerializationUtil.getAsIdentifier(root, "creative_tab", null);
+		this.advancementsTab = SerializationUtil.getAsIdentifier(root, "advancements_tab", null);
 		this.noBook = GsonHelper.getAsBoolean(root, "dont_generate_book", false);
 		this.showToasts = GsonHelper.getAsBoolean(root, "show_toasts", true);
 		this.pauseGame = GsonHelper.getAsBoolean(root, "pause_game", false);
@@ -149,7 +163,7 @@ public class Book {
 		}
 
 		// Check legacy extensions flag
-		ResourceLocation extensionTargetID = SerializationUtil.getAsResourceLocation(root, "extend", null);
+		Identifier extensionTargetID = SerializationUtil.getAsIdentifier(root, "extend", null);
 		if (extensionTargetID != null) {
 			String message = "Book %s is declared to extend %s. ".formatted(this.id, extensionTargetID)
 					+ "This behaviour was removed in 1.20. "
@@ -232,7 +246,7 @@ public class Book {
 		if (useBlockyFont) {
 			return Style.EMPTY;
 		} else {
-			return Style.EMPTY.withFont(Minecraft.UNIFORM_FONT);
+			return Style.EMPTY.withFont(new FontDescription.Resource(Minecraft.UNIFORM_FONT));
 		}
 	}
 

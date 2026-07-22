@@ -20,3 +20,5 @@ Xplat/logs/
 Fabric/bin/
 Xplat/bin/
 NeoForge/bin/
+# Local porting scratch files
+.codex-scratch/

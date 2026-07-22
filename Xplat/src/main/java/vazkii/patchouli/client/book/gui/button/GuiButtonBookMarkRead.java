@@ -1,7 +1,7 @@
 package vazkii.patchouli.client.book.gui.button;
 
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.input.InputWithModifiers;
 import net.minecraft.network.chat.Component;
 
 import vazkii.patchouli.client.base.PersistentData;
@@ -16,12 +16,12 @@ public class GuiButtonBookMarkRead extends GuiButtonBook {
 	private final Book book;
 
 	public GuiButtonBookMarkRead(GuiBook parent, int x, int y) {
-		super(parent, x, y, 308, 31, 11, 11, Button::onPress, getTooltip(parent.book));
+		super(parent, x, y, 308, 31, 11, 11, button -> {}, getTooltip(parent.book));
 		this.book = parent.book;
 	}
 
 	@Override
-	public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+	protected void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
 		int px = getX() + 1;
 		int py = (int) (getY() + 0.5);
 		GuiBook.drawFromTexture(graphics, book, getX(), getY(), 285, 160, 13, 10);
@@ -34,7 +34,7 @@ public class GuiButtonBookMarkRead extends GuiButtonBook {
 	}
 
 	@Override
-	public void onPress() {
+	public void onPress(InputWithModifiers input) {
 		for (BookEntry entry : this.book.getContents().entries.values()) {
 			if (isMainPage(this.book)) {
 				markEntry(entry);

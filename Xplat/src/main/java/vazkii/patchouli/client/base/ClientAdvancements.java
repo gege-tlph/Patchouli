@@ -6,10 +6,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.toasts.Toast;
-import net.minecraft.client.gui.components.toasts.ToastComponent;
+import net.minecraft.client.gui.components.toasts.ToastManager;
 import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import vazkii.patchouli.client.book.ClientBookRegistry;
 import vazkii.patchouli.common.book.Book;
@@ -37,7 +38,7 @@ public class ClientAdvancements {
 	}
 
 	public static boolean hasDone(String advancement) {
-		ResourceLocation id = ResourceLocation.tryParse(advancement);
+		Identifier id = Identifier.tryParse(advancement);
 		if (id != null) {
 			ClientPacketListener conn = Minecraft.getInstance().getConnection();
 			if (conn != null) {
@@ -53,20 +54,25 @@ public class ClientAdvancements {
 		return false;
 	}
 
+	public static boolean hasReceivedFirstAdvPacket() {
+		return gotFirstAdvPacket;
+	}
+
 	public static void playerLogout() {
 		gotFirstAdvPacket = false;
 	}
 
 	public static void sendBookToast(Book book) {
-		ToastComponent gui = Minecraft.getInstance().getToasts();
+		ToastManager gui = Minecraft.getInstance().getToastManager();
 		if (gui.getToast(LexiconToast.class, book) == null) {
 			gui.addToast(new LexiconToast(book));
 		}
 	}
 
 	public static class LexiconToast implements Toast {
-		private static final ResourceLocation BACKGROUND_SPRITE = ResourceLocation.withDefaultNamespace("toast/advancement");
+		private static final Identifier BACKGROUND_SPRITE = Identifier.withDefaultNamespace("toast/advancement");
 		private final Book book;
+		private Visibility wantedVisibility;
 
 		public LexiconToast(Book book) {
 			this.book = book;
@@ -78,21 +84,26 @@ public class ClientAdvancements {
 			return book;
 		}
 
-		@NotNull
 		@Override
-		public Visibility render(GuiGraphics graphics, ToastComponent toastGui, long delta) {
-			graphics.blitSprite(BACKGROUND_SPRITE, 0, 0, width(), height());
+		public void render(GuiGraphics graphics, Font font, long visibilityTime) {
+			graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BACKGROUND_SPRITE, 0, 0, width(), height());
 
-			Font font = toastGui.getMinecraft().font;
 			graphics.drawString(font, Component.translatable(book.name), 30, 7, 0xfff000f0, false);
 			graphics.drawString(font, Component.translatable("patchouli.gui.lexicon.toast.info"), 30, 17, 0xffffffff, false);
 
 			graphics.renderItem(book.getBookItem(), 8, 8);
 			graphics.renderItemDecorations(font, book.getBookItem(), 8, 8);
-
-			return delta >= 5000L ? Toast.Visibility.HIDE : Toast.Visibility.SHOW;
 		}
 
+		@Override
+		public Visibility getWantedVisibility() {
+			return wantedVisibility;
+		}
+
+		@Override
+		public void update(ToastManager toastManager, long visibilityTime) {
+			this.wantedVisibility = visibilityTime >= 5000.0 * toastManager.getNotificationDisplayTimeMultiplier() ? Toast.Visibility.HIDE : Toast.Visibility.SHOW;
+		}
 	}
 
 }

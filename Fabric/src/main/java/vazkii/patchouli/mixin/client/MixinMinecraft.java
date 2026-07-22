@@ -12,8 +12,8 @@ import vazkii.patchouli.client.base.ClientAdvancements;
 
 @Mixin(Minecraft.class)
 public class MixinMinecraft {
-	@Inject(at = @At("HEAD"), method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;)V")
-	public void patchouli_onLogout(Screen screen, CallbackInfo info) {
+	@Inject(at = @At("HEAD"), method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;ZZ)V")
+	public void patchouli_onLogout(Screen screen, boolean keepResourcePacks, boolean showDisconnectScreen, CallbackInfo info) {
 		ClientAdvancements.playerLogout();
 	}
 

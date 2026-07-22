@@ -1,11 +1,12 @@
 package vazkii.patchouli.client.base;
 
-import com.google.common.base.Charsets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
+
+import org.jspecify.annotations.Nullable;
 
 import vazkii.patchouli.api.PatchouliAPI;
 import vazkii.patchouli.client.book.BookEntry;
@@ -13,6 +14,7 @@ import vazkii.patchouli.common.book.Book;
 import vazkii.patchouli.common.util.SerializationUtil;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -29,7 +31,7 @@ public final class PersistentData {
 	public static DataHolder data = new DataHolder(new JsonObject());
 
 	public static void setup() {
-		try (var r = Files.newBufferedReader(saveFile, Charsets.UTF_8)) {
+		try (var r = Files.newBufferedReader(saveFile, StandardCharsets.UTF_8)) {
 			var root = SerializationUtil.RAW_GSON.fromJson(r, JsonObject.class);
 			data = new DataHolder(root);
 		} catch (IOException e) {
@@ -47,7 +49,7 @@ public final class PersistentData {
 
 	public static void save() {
 		var json = data.serialize();
-		try (var w = Files.newBufferedWriter(saveFile, Charsets.UTF_8)) {
+		try (var w = Files.newBufferedWriter(saveFile, StandardCharsets.UTF_8)) {
 			SerializationUtil.PRETTY_GSON.toJson(json, w);
 		} catch (IOException e) {
 			PatchouliAPI.LOGGER.warn("Unable to save patchouli_data.json", e);
@@ -58,7 +60,7 @@ public final class PersistentData {
 		public int bookGuiScale;
 		public boolean clickedVisualize;
 
-		private final Map<ResourceLocation, PersistentData.BookData> bookData = new HashMap<>();
+		private final Map<Identifier, PersistentData.BookData> bookData = new HashMap<>();
 
 		public DataHolder(JsonObject root) {
 			this.bookGuiScale = GsonHelper.getAsInt(root, "bookGuiScale", 0);
@@ -66,7 +68,7 @@ public final class PersistentData {
 			var obj = GsonHelper.getAsJsonObject(root, "bookData", new JsonObject());
 
 			for (var e : obj.entrySet()) {
-				this.bookData.put(ResourceLocation.tryParse(e.getKey()), new BookData(e.getValue().getAsJsonObject()));
+				this.bookData.put(Identifier.parse(e.getKey()), new BookData(e.getValue().getAsJsonObject()));
 			}
 		}
 
@@ -88,21 +90,13 @@ public final class PersistentData {
 		}
 	}
 
-	public static final class Bookmark {
-		public final ResourceLocation entry;
-		public final int spread;
-
-		public Bookmark(ResourceLocation entry, int spread) {
-			this.entry = entry;
-			this.spread = spread;
-		}
+	public record Bookmark(Identifier entry, int spread) {
 
 		public Bookmark(JsonObject root) {
-			this.entry = ResourceLocation.tryParse(GsonHelper.getAsString(root, "entry"));
-			this.spread = GsonHelper.getAsInt(root, "page"); // Serialized as page for legacy reasons
+			this(Identifier.parse(GsonHelper.getAsString(root, "entry")), GsonHelper.getAsInt(root, "page"));// Serialized as page for legacy reasons
 		}
 
-		public BookEntry getEntry(Book book) {
+		public @Nullable BookEntry getEntry(Book book) {
 			return book.getContents().entries.get(entry);
 		}
 
@@ -115,24 +109,24 @@ public final class PersistentData {
 	}
 
 	public static final class BookData {
-		public final List<ResourceLocation> viewedEntries = new ArrayList<>();
+		public final List<Identifier> viewedEntries = new ArrayList<>();
 		public final List<Bookmark> bookmarks = new ArrayList<>();
-		public final List<ResourceLocation> history = new ArrayList<>();
-		public final List<ResourceLocation> completedManualQuests = new ArrayList<>();
+		public final List<Identifier> history = new ArrayList<>();
+		public final List<Identifier> completedManualQuests = new ArrayList<>();
 
 		public BookData(JsonObject root) {
 			var emptyArray = new JsonArray();
 			for (var e : GsonHelper.getAsJsonArray(root, "viewedEntries", emptyArray)) {
-				viewedEntries.add(ResourceLocation.tryParse(e.getAsString()));
+				viewedEntries.add(Identifier.parse(e.getAsString()));
 			}
 			for (var e : GsonHelper.getAsJsonArray(root, "bookmarks", emptyArray)) {
 				bookmarks.add(new Bookmark(e.getAsJsonObject()));
 			}
 			for (var e : GsonHelper.getAsJsonArray(root, "history", emptyArray)) {
-				history.add(ResourceLocation.tryParse(e.getAsString()));
+				history.add(Identifier.parse(e.getAsString()));
 			}
 			for (var e : GsonHelper.getAsJsonArray(root, "completedManualQuests", emptyArray)) {
-				completedManualQuests.add(ResourceLocation.tryParse(e.getAsString()));
+				completedManualQuests.add(Identifier.parse(e.getAsString()));
 			}
 		}
 

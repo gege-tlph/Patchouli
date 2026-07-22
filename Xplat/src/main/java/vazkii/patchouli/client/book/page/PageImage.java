@@ -1,10 +1,9 @@
 package vazkii.patchouli.client.book.page;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
 
 import vazkii.patchouli.client.book.gui.GuiBook;
 import vazkii.patchouli.client.book.gui.GuiBookEntry;
@@ -13,7 +12,7 @@ import vazkii.patchouli.client.book.page.abstr.PageWithText;
 
 public class PageImage extends PageWithText {
 
-	ResourceLocation[] images;
+	Identifier[] images;
 	String title;
 	boolean border;
 
@@ -34,11 +33,9 @@ public class PageImage extends PageWithText {
 
 		int x = GuiBook.PAGE_WIDTH / 2 - 53;
 		int y = 7;
-		graphics.setColor(1F, 1F, 1F, 1F);
-		RenderSystem.enableBlend();
-		graphics.pose().scale(0.5F, 0.5F, 0.5F);
-		graphics.blit(images[index], x * 2 + 6, y * 2 + 6, 0, 0, 200, 200);
-		graphics.pose().scale(2F, 2F, 2F);
+		graphics.pose().scale(0.5F, 0.5F);
+		graphics.blit(RenderPipelines.GUI_TEXTURED, images[index], x * 2 + 6, y * 2 + 6, 0, 0, 200, 200, 256, 256);
+		graphics.pose().scale(2F, 2F);
 
 		if (border) {
 			GuiBook.drawFromTexture(graphics, book, x, y, 405, 149, 106, 106);

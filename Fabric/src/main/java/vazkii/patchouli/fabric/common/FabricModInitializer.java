@@ -6,12 +6,14 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.recipe.v1.sync.RecipeSynchronization;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 
 import vazkii.patchouli.common.advancement.PatchouliCriteriaTriggers;
 import vazkii.patchouli.common.base.PatchouliSounds;
@@ -38,6 +40,19 @@ public class FabricModInitializer implements ModInitializer {
 
 		PayloadTypeRegistry.playS2C().register(MessageOpenBookGui.TYPE, MessageOpenBookGui.CODEC);
 		PayloadTypeRegistry.playS2C().register(MessageReloadBookContents.TYPE, MessageReloadBookContents.CODEC);
+
+		// Recipe pages resolve recipes client side, but since 1.21.2 the server no longer
+		// syncs full recipes; Fabric's recipe sync is opt-in per serializer.
+		RecipeSynchronization.synchronizeRecipeSerializer(RecipeSerializer.SHAPED_RECIPE);
+		RecipeSynchronization.synchronizeRecipeSerializer(RecipeSerializer.SHAPELESS_RECIPE);
+		RecipeSynchronization.synchronizeRecipeSerializer(RecipeSerializer.TRANSMUTE);
+		RecipeSynchronization.synchronizeRecipeSerializer(RecipeSerializer.SMELTING_RECIPE);
+		RecipeSynchronization.synchronizeRecipeSerializer(RecipeSerializer.BLASTING_RECIPE);
+		RecipeSynchronization.synchronizeRecipeSerializer(RecipeSerializer.SMOKING_RECIPE);
+		RecipeSynchronization.synchronizeRecipeSerializer(RecipeSerializer.CAMPFIRE_COOKING_RECIPE);
+		RecipeSynchronization.synchronizeRecipeSerializer(RecipeSerializer.STONECUTTER);
+		RecipeSynchronization.synchronizeRecipeSerializer(RecipeSerializer.SMITHING_TRANSFORM);
+		RecipeSynchronization.synchronizeRecipeSerializer(RecipeSerializer.SMITHING_TRIM);
 
 		BookRegistry.INSTANCE.init();
 
