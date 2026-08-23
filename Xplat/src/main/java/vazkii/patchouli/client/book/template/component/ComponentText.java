@@ -35,6 +35,11 @@ public class ComponentText extends TemplateComponent {
 	public void build(BookContentsBuilder builder, BookPage page, BookEntry entry, int pageNum) {
 		try {
 			color = Integer.parseInt(colorStr.asString(""), 16);
+			// 6 位 hex 颜色解析后 alpha 字节为 0；1.21.11 的 Font 不再把 alpha=0 兜底成不透明，
+			// 会导致文字全透明。此处补齐不透明 alpha（对齐 1.21.1 行为）。
+			if ((color & 0xFF000000) == 0) {
+				color |= 0xFF000000;
+			}
 		} catch (NumberFormatException e) {
 			color = page.book.textColor;
 		}

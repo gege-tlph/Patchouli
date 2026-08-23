@@ -31,6 +31,11 @@ public class ComponentHeader extends TemplateComponent {
 	public void build(BookContentsBuilder builder, BookPage page, BookEntry entry, int pageNum) {
 		try {
 			color = Integer.parseInt(colorStr.asString(""), 16);
+			// 6 位 hex 颜色（如 "000000"/"777777"）解析后 alpha 字节为 0。1.21.1 的 Font 会把
+			// alpha=0 兜底成不透明，1.21.11 删了该兜底 → 文字全透明。此处补齐不透明 alpha。
+			if ((color & 0xFF000000) == 0) {
+				color |= 0xFF000000;
+			}
 		} catch (NumberFormatException e) {
 			color = page.book.headerColor;
 		}
