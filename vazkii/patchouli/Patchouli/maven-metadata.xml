@@ -3,12 +3,13 @@
   <groupId>vazkii.patchouli</groupId>
   <artifactId>Patchouli</artifactId>
   <versioning>
-    <latest>1.21.11-94.1-FABRIC</latest>
-    <release>1.21.11-94.1-FABRIC</release>
+    <latest>1.21.11-94.4-FABRIC</latest>
+    <release>1.21.11-94.4-FABRIC</release>
     <versions>
       <version>1.21.11-94-FABRIC</version>
       <version>1.21.11-94.1-FABRIC</version>
+      <version>1.21.11-94.4-FABRIC</version>
     </versions>
-    <lastUpdated>20260722222758</lastUpdated>
+    <lastUpdated>20260823092415</lastUpdated>
   </versioning>
 </metadata>
