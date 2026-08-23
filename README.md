@@ -1,5 +1,7 @@
 # Patchouli
 
+**简体中文** | [English](README_en.md)
+
 [![CurseForge](https://img.shields.io/curseforge/dt/1664943?logo=curseforge&logoColor=white&label=CurseForge&color=F16436)](https://www.curseforge.com/minecraft/mc-mods/patchouli-fabric-edition)
 [![Release](https://img.shields.io/github/v/release/gege-tlph/Patchouli?logo=github&label=Release)](https://github.com/gege-tlph/Patchouli/releases/latest)
 [![GitHub downloads](https://img.shields.io/github/downloads/gege-tlph/Patchouli/total?logo=github&label=Downloads)](https://github.com/gege-tlph/Patchouli/releases)
@@ -11,8 +13,6 @@
 > 本仓库是 [VazkiiMods/Patchouli](https://github.com/VazkiiMods/Patchouli) 的非官方维护 fork，面向 Minecraft 1.21.11 与 Fabric。本 fork 不代表 Patchouli 官方版本；其他 Minecraft 版本请使用上游发行版。
 
 Patchouli 是一个数据驱动的游戏内手册系统，供模组作者和整合包作者制作易于阅读、可交互且无需自行编写界面代码的说明书。
-
-English: An unofficial Fabric 1.21.11 port of Patchouli, a data-driven in-game documentation system for mod and modpack authors.
 
 ## 功能
 
@@ -54,7 +54,7 @@ repositories {
 }
 
 dependencies {
-    modImplementation "vazkii.patchouli:Patchouli:1.21.11-94.1-FABRIC"
+    modImplementation "vazkii.patchouli:Patchouli:1.21.11-94.4-FABRIC"
 }
 ```
 
