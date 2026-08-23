@@ -1,5 +1,12 @@
 # Patchouli
 
+[![CurseForge](https://img.shields.io/curseforge/dt/1664943?logo=curseforge&logoColor=white&label=CurseForge&color=F16436)](https://www.curseforge.com/minecraft/mc-mods/patchouli-fabric-edition)
+[![Release](https://img.shields.io/github/v/release/gege-tlph/Patchouli?logo=github&label=Release)](https://github.com/gege-tlph/Patchouli/releases/latest)
+[![GitHub downloads](https://img.shields.io/github/downloads/gege-tlph/Patchouli/total?logo=github&label=Downloads)](https://github.com/gege-tlph/Patchouli/releases)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.11-62B47A)](https://www.minecraft.net/)
+[![Mod Loader](https://img.shields.io/badge/Mod%20Loader-Fabric-DBD0B4)](https://fabricmc.net/)
+[![License](https://img.shields.io/badge/License-CC%20BY--NC--SA%203.0-blue)](LICENSE)
+
 > [!IMPORTANT]
 > 本仓库是 [VazkiiMods/Patchouli](https://github.com/VazkiiMods/Patchouli) 的非官方维护 fork，面向 Minecraft 1.21.11 与 Fabric。本 fork 不代表 Patchouli 官方版本；其他 Minecraft 版本请使用上游发行版。
 
