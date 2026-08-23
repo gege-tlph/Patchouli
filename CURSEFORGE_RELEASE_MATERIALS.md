@@ -20,11 +20,42 @@ Unofficial Minecraft 1.21.11 Fabric port of Patchouli, a data-driven in-game doc
 
 ## 详细描述
 
-Patchouli is a data-driven in-game documentation system for Minecraft mod and modpack authors. It lets projects define accessible, interactive guide books without writing a custom screen for every page.
+## Patchouli: Fabric Edition
 
-This project is an unofficial maintained Fabric port for Minecraft 1.21.11. It includes support for text, images, recipes, smelting, entities, quests, relations, progress displays, and multiblock previews, together with client/server book and recipe synchronization.
+Patchouli: Fabric Edition is an unofficial community-maintained port of Patchouli for Minecraft 1.21.11 and Fabric. Patchouli is a data-driven in-game documentation system that lets mod and modpack authors create interactive guide books.
 
-This fork is not an official release by VazkiiMods. For other Minecraft versions, use the corresponding official Patchouli release.
+### Original project and credit
+
+All credit for the original Patchouli project, design, code, and assets belongs to its original authors and contributors, including Vazkii and williewillus.
+
+- Original CurseForge project: https://www.curseforge.com/minecraft/mc-mods/patchouli
+- Original source repository: https://github.com/VazkiiMods/Patchouli
+- Official documentation: https://vazkiimods.github.io/Patchouli/docs/intro
+
+This port is not an official VazkiiMods release and is not endorsed by, sponsored by, or affiliated with the original authors. For Minecraft versions supported by the original project, please use the official Patchouli releases.
+
+### How this project differs from the original
+
+The official Patchouli project does not currently provide this maintained Minecraft 1.21.11 Fabric build. This fork ports the Minecraft 1.21.1 implementation to Minecraft 1.21.11 and publishes only the Fabric artifact for this version.
+
+The port includes:
+
+- Minecraft 1.21.11 and Java 21 API migrations.
+- Fabric Loader and Fabric API support for Minecraft 1.21.11.
+- Migration of book item rendering to the newer data-driven item model system.
+- Fabric recipe synchronization and book rebuilding after synchronized recipes arrive.
+- Migration of in-book multiblock previews to Minecraft's picture-in-picture rendering system.
+- Restored translucent world multiblock previews.
+- Compatibility fixes for 1.21.11 text color rendering, networking, mixins, and NBT APIs.
+
+Source code for this maintained port: https://github.com/gege-tlph/Patchouli
+
+### License
+
+The original Patchouli code and assets are licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported license. This fork and its modifications are distributed under the same license and retain the original license file and attribution.
+
+- Full license text: https://creativecommons.org/licenses/by-nc-sa/3.0/legalcode
+- Repository license file: https://github.com/gege-tlph/Patchouli/blob/port/1.21.11-fabric/LICENSE
 
 ## 建议分类与标签
 
@@ -61,10 +92,16 @@ This fork is not an official release by VazkiiMods. For other Minecraft versions
 
 ## 审核备注
 
-This is an unofficial community-maintained Fabric port of Patchouli for Minecraft 1.21.11. The project keeps the original `patchouli` mod ID and CC BY-NC-SA 3.0 license, links to the upstream project, and only publishes the Fabric artifact for this game version.
+The project description has been updated to provide explicit credit to the original Patchouli authors, direct links to the original CurseForge page and source repository, a detailed list of differences between this Minecraft 1.21.11 Fabric port and the original project, and confirmation that this fork follows the original CC BY-NC-SA 3.0 Unported license.
+
+## 自定义许可证字段
+
+- **License name**：`Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported`
+- **Short name**：`CC BY-NC-SA 3.0 Unported`
+- **License URL**：`https://creativecommons.org/licenses/by-nc-sa/3.0/legalcode`
+- **Source license**：`https://github.com/gege-tlph/Patchouli/blob/port/1.21.11-fabric/LICENSE`
 
 ## 页面图片
 
 - 项目图标副本：`release/curseforge/patchouli-icon.png`
 - 可从 GitHub Release 页面获取首发 JAR：`release-1.21.11-94.4-FABRIC`
-
