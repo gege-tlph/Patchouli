@@ -28,7 +28,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
 import vazkii.patchouli.client.book.LiquidBlockVertexConsumer;
-import vazkii.patchouli.client.book.gui.GuiBook;
 import vazkii.patchouli.common.multiblock.AbstractMultiblock;
 import vazkii.patchouli.xplat.IClientXplatAbstractions;
 
@@ -54,6 +53,12 @@ public class MultiblockPiPRenderer extends PictureInPictureRenderer<MultiblockPi
 		return MultiblockPiPRenderState.class;
 	}
 
+	@Override
+	protected float getTranslateY(int height, int guiScale) {
+		// 基类默认返回 height（原点落在元素底边）。多方块预览要垂直居中，故取 height/2。
+		return height / 2.0F;
+	}
+
 	/**
 	 * @implNote Adapted from {@link SectionCompiler#compile(SectionPos, RenderSectionRegion, VertexSorting, SectionBufferBuilderPack)}
 	 */
@@ -72,10 +77,10 @@ public class MultiblockPiPRenderer extends PictureInPictureRenderer<MultiblockPi
 		double scaleY = maxY / sizeY;
 		float scale = (float) -Math.min(scaleX, scaleY);
 
-		int xPos = GuiBook.PAGE_WIDTH / 2;
-		int yPos = 60;
+		// PiP 基类 prepare() 已把原点置于元素中心（水平 j/2；垂直经上面的 getTranslateY 覆写为 k/2），
+		// 并按 guiScale 缩放。旧的 translate(GuiBook.PAGE_WIDTH/2, 60) 是 pre-PiP 直接渲染进书页时的绝对
+		// 坐标；在已居中的坐标上再偏移 (58,60) 会把结构整体推出 106×106 纹理 → 预览空白。移除之。
 		poseStack.pushPose();
-		poseStack.translate(xPos, yPos, 0);
 		poseStack.scale(scale, scale, scale);
 		poseStack.translate(-(float) sizeX / 2, -(float) sizeY / 2, 0);
 
@@ -94,6 +99,12 @@ public class MultiblockPiPRenderer extends PictureInPictureRenderer<MultiblockPi
 		for (BlockPos pos : BlockPos.betweenClosed(bounds)) {
 			BlockState blockstate = multiblock.getBlockState(pos);
 
+			// 每个方块必须按其在多方块内的坐标平移后再渲染。renderBatched / BE submit 只用 pos 取
+			// tint/seed，不会自行平移（对齐 SectionCompiler.compile 与 pre-PiP 旧版 doWorldRenderPass）。
+			// 缺这圈 push/translate/pop 会让所有方块叠在原点，画面上只剩一个方块。
+			poseStack.pushPose();
+			poseStack.translate(pos.getX(), pos.getY(), pos.getZ());
+
 			if (blockstate.hasBlockEntity()) {
 				BlockEntity blockentity = multiblock.getBlockEntity(pos);
 				if (blockentity != null) {
@@ -111,6 +122,8 @@ public class MultiblockPiPRenderer extends PictureInPictureRenderer<MultiblockPi
 				RAND.setSeed(blockstate.getSeed(pos));
 				IClientXplatAbstractions.INSTANCE.renderForMultiblock(blockRenderer, blockstate, pos, multiblock, poseStack, bufferLookup, RAND);
 			}
+
+			poseStack.popPose();
 		}
 
 		poseStack.popPose();
